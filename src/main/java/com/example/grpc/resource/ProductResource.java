@@ -2,6 +2,7 @@ package com.example.grpc.resource;
 
 import com.example.grpc.*;
 import com.example.grpc.dto.ProductInputDto;
+import com.example.grpc.dto.ProductOutputDto;
 import com.example.grpc.service.ProductService;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -35,7 +36,17 @@ public class ProductResource extends ProductServiceGrpc.ProductServiceImplBase {
 
     @Override
     public void findById(RequestById request, StreamObserver<ProductResponse> responseObserver) {
-        super.findById(request, responseObserver);
+        var productById = request.getId();
+        ProductOutputDto productOutputDto = this.productService.findById(productById);
+        ProductResponse productResponse = ProductResponse.newBuilder()
+                .setId(productOutputDto.getId())
+                .setName(productOutputDto.getName())
+                .setPrice(productOutputDto.getPrice())
+                .setQuantityInStock(productOutputDto.getQuantityInStock())
+                .build();
+
+        responseObserver.onNext(productResponse);
+        responseObserver.onCompleted();
     }
 
     @Override
