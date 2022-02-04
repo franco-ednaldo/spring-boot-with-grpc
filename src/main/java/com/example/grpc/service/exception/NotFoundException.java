@@ -18,6 +18,6 @@ public class NotFoundException extends BaseBusinessException {
 
     @Override
     public Status getStatusCode() {
-        return Status.ALREADY_EXISTS;
+        return Status.NOT_FOUND;
     }
 }
