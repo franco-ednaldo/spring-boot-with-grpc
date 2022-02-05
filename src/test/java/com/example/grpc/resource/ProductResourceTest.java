@@ -133,11 +133,13 @@ public class ProductResourceTest {
     @DisplayName("when findAll product, should return success")
     public void findAllWithSuccess() {
         var products = this.productServiceGrpcStub.findAll(EmptyRequest.newBuilder().build());
-        Assertions.assertThat(products.getProductsList())
+        assertThat(products).isInstanceOf(ProductResponseList.class);
+        assertThat(products.getProductsCount()).isEqualTo(2);
+        assertThat(products.getProductsList())
                 .extracting("id", "name", "price", "quantityInStock")
                 .contains(
                         tuple(1L, "CELULAR", 1000.99, 10),
-                        tuple( 2L, "Televisão LG", 2500.99, 10)
+                        tuple(2L, "Televisão LG", 2500.99, 10)
                 );
     }
 
