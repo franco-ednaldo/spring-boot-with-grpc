@@ -17,6 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @ExtendWith(SpringExtension.class)
 public class ProductServiceTest {
 
@@ -69,7 +72,7 @@ public class ProductServiceTest {
         final Long productId = 1l;
         Mockito.when(this.productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        Assertions.assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(()-> this.productService.findById(productId))
                 .withMessage(String.format(ERROR_MESSAGE_NOT_FOUND, productId));
 
@@ -88,6 +91,28 @@ public class ProductServiceTest {
         Assertions.assertThat(result.getName()).isEqualTo(productSave.getName());
         Assertions.assertThat(result.getPrice()).isEqualTo(productSave.getPrice());
         Assertions.assertThat(result.getQuantityInStock()).isEqualTo(productSave.getQuantityInStock());
+
+    }
+
+    @Test
+    @DisplayName("when delete some product by id, not should throw exception")
+    public void deleteByIdWithSuccess() {
+        final Long productId = 1l;
+        var productSave = this.createProductEntity(productId, "Celular", 2000.0, 1);
+        Mockito.when(this.productRepository.findById(productId)).thenReturn(Optional.of(productSave));
+        assertDoesNotThrow(() -> this.productService.delete(productId));
+        Mockito.verify(this.productRepository, Mockito.times(1)).deleteById(productId);
+
+    }
+
+    @Test
+    @DisplayName("when delete some product by id, should throw exception")
+    public void deleteByIdWithError() {
+        final Long productId = 1l;
+        var productSave = this.createProductEntity(productId, "Celular", 2000.0, 1);
+        Mockito.when(this.productRepository.findById(productId)).thenReturn(Optional.empty());
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() ->this.productService.delete(productId));
 
     }
 

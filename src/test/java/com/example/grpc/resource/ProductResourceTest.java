@@ -1,15 +1,13 @@
 package com.example.grpc.resource;
 
-import com.example.grpc.ProductRequest;
-import com.example.grpc.ProductResponse;
-import com.example.grpc.ProductServiceGrpc;
-import com.example.grpc.RequestById;
+import com.example.grpc.*;
 import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -17,6 +15,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
@@ -99,6 +98,33 @@ public class ProductResourceTest {
 
         assertThatExceptionOfType(StatusRuntimeException.class)
                 .isThrownBy(() -> this.productServiceGrpcStub.findById(requestById))
+                .withMessage(String.format(ERROR_MESSAGE_NOT_FOUND, productId));
+
+    }
+
+    @Test
+    @DisplayName("when delete product by id, should return success")
+    public void deleteByIdWithSuccess() {
+        Long productId = 1l;
+        var requestById = RequestById.newBuilder()
+                .setId(productId)
+                .build();
+
+        assertDoesNotThrow(() -> this.productServiceGrpcStub.delete(requestById));
+
+    }
+
+
+    @Test
+    @DisplayName("when find product by id, but not found product, and return some exception")
+    public void deleteByIdWithError() {
+        Long productId = 100l;
+        var requestById = RequestById.newBuilder()
+                .setId(productId)
+                .build();
+
+        assertThatExceptionOfType(StatusRuntimeException.class)
+                .isThrownBy(() -> this.productServiceGrpcStub.delete(requestById))
                 .withMessage(String.format(ERROR_MESSAGE_NOT_FOUND, productId));
 
     }
