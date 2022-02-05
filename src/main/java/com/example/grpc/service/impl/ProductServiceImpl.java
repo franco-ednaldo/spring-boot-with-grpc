@@ -11,6 +11,7 @@ import com.example.grpc.service.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -43,7 +44,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductOutputDto> findAll() {
-        return null;
+        var products = this.productRepository.findAll();
+        return products.stream()
+                .map(ProductConverter::converter)
+                .collect(Collectors.toList());
     }
 
     private void checkDuplicity(final String name) {

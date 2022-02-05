@@ -7,6 +7,9 @@ import com.example.grpc.service.ProductService;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @GrpcService
 public class ProductResource extends ProductServiceGrpc.ProductServiceImplBase {
     private final ProductService productService;
@@ -59,6 +62,20 @@ public class ProductResource extends ProductServiceGrpc.ProductServiceImplBase {
 
     @Override
     public void findAll(EmptyRequest request, StreamObserver<ProductResponseList> responseObserver) {
-        super.findAll(request, responseObserver);
+        List<ProductOutputDto> products = this.productService.findAll();
+        var productResponse = products.stream()
+                .map(i -> ProductResponse.newBuilder()
+                        .setId(i.getId())
+                        .setName(i.getName())
+                        .setPrice(i.getPrice())
+                        .setQuantityInStock(i.getQuantityInStock())
+                        .build())
+                .collect(Collectors.toList());
+        var result = ProductResponseList.newBuilder()
+                .addAllProducts(productResponse)
+                .build();
+        responseObserver.onNext(result);
+        responseObserver.onCompleted();
+
     }
 }

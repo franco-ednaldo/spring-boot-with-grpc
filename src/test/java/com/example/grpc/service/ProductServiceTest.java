@@ -15,9 +15,11 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(SpringExtension.class)
@@ -73,7 +75,7 @@ public class ProductServiceTest {
         Mockito.when(this.productRepository.findById(productId)).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(()-> this.productService.findById(productId))
+                .isThrownBy(() -> this.productService.findById(productId))
                 .withMessage(String.format(ERROR_MESSAGE_NOT_FOUND, productId));
 
     }
@@ -112,8 +114,29 @@ public class ProductServiceTest {
         var productSave = this.createProductEntity(productId, "Celular", 2000.0, 1);
         Mockito.when(this.productRepository.findById(productId)).thenReturn(Optional.empty());
         assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() ->this.productService.delete(productId));
+                .isThrownBy(() -> this.productService.delete(productId));
 
+    }
+
+    @Test
+    @DisplayName("when findAll some product, and return success")
+    public void findAllWithSuccess() {
+
+        var products = List.of(
+                this.createProductEntity(1l, "Celular", 2000.0, 1),
+                this.createProductEntity(2l, "Televisão LG", 2000.0, 1)
+
+        );
+        Mockito.when(this.productRepository.findAll()).thenReturn(products);
+
+        var result = this.productService.findAll();
+
+        Assertions.assertThat(result)
+                .extracting("id", "name", "price", "quantityInStock")
+                .contains(
+                        tuple(1l, "Celular", 2000.0, 1),
+                        tuple( 2l, "Televisão LG", 2000.0, 1)
+                );
     }
 
     private ProductInputDto createProductInputDto(Long id, String name, double price, int quantityInStock) {

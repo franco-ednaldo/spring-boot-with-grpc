@@ -3,6 +3,7 @@ package com.example.grpc.resource;
 import com.example.grpc.*;
 import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.assertj.core.api.Assertions;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +16,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringBootTest
@@ -111,9 +113,7 @@ public class ProductResourceTest {
                 .build();
 
         assertDoesNotThrow(() -> this.productServiceGrpcStub.delete(requestById));
-
     }
-
 
     @Test
     @DisplayName("when find product by id, but not found product, and return some exception")
@@ -127,6 +127,18 @@ public class ProductResourceTest {
                 .isThrownBy(() -> this.productServiceGrpcStub.delete(requestById))
                 .withMessage(String.format(ERROR_MESSAGE_NOT_FOUND, productId));
 
+    }
+
+    @Test
+    @DisplayName("when findAll product, should return success")
+    public void findAllWithSuccess() {
+        var products = this.productServiceGrpcStub.findAll(EmptyRequest.newBuilder().build());
+        Assertions.assertThat(products.getProductsList())
+                .extracting("id", "name", "price", "quantityInStock")
+                .contains(
+                        tuple(1L, "CELULAR", 1000.99, 10),
+                        tuple( 2L, "Televisão LG", 2500.99, 10)
+                );
     }
 
     private ProductRequest createComponent(String name, double price, Integer quantidade) {
