@@ -49,17 +49,17 @@ public class ProductResourceTest {
                 .setQuantityInStock(1)
                 .build();
 
-        var productResponde = this.productServiceGrpcStub
+        var productResponse = this.productServiceGrpcStub
                 .create(productRequest);
 
         assertThat(productRequest)
                 .usingRecursiveComparison()
                 .comparingOnlyFields("name", "price", "quantity_in_stock");
 
-        assertThat(productResponde.getId()).isGreaterThan(0);
-        assertThat(productResponde.getName()).isEqualTo(productRequest.getName());
-        assertThat(productResponde.getPrice()).isEqualTo(productRequest.getPrice());
-        assertThat(productResponde.getQuantityInStock()).isEqualTo(productRequest.getQuantityInStock());
+        assertThat(productResponse.getId()).isGreaterThan(0);
+        assertThat(productResponse.getName()).isEqualTo(productRequest.getName());
+        assertThat(productResponse.getPrice()).isEqualTo(productRequest.getPrice());
+        assertThat(productResponse.getQuantityInStock()).isEqualTo(productRequest.getQuantityInStock());
     }
 
     @Test
